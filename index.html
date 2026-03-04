@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Fast-Acting Format – Mood</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --forest:      #1B3A2F;
+    --forest-mid:  #244D3E;
+    --forest-dark: #162E25;
+    --white:       #FFFFFF;
+    --off-white:   #F5F2EC;
+    --sage:        #A8C5A0;
+    --lavender:    #B8A8D4;
+    --dusty-pink:  #D4A8B0;
+    --warm-cream:  #D4C5A0;
+    --mint:        #A0C5BE;
+    --border:      rgba(255,255,255,0.08);
+    --radius:      14px;
+    --font:        'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--forest);
+    font-family: var(--font);
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .quiz-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px;
+  }
+
+  .quiz-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--forest-mid);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    height: 4px;
+    background: var(--forest-dark);
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--sage);
+    border-radius: 0 4px 4px 0;
+    transition: width 0.45s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── Header strip ── */
+  .quiz-header {
+    padding: 22px 28px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mood-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+  .quiz-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sage);
+  }
+  .step-count {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ── Body ── */
+  .quiz-body {
+    padding: 28px 28px 32px;
+  }
+
+  .question-text {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--white);
+    margin-bottom: 22px;
+    min-height: 56px;
+  }
+
+  /* ── Option buttons ── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    width: 100%;
+    background: var(--forest-dark);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    color: var(--off-white);
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, transform 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .option-btn:hover {
+    background: #1E4436;
+    border-color: var(--sage);
+    transform: translateX(3px);
+  }
+  .option-btn:active { transform: scale(0.98); }
+  .option-btn.selected {
+    background: #1E4436;
+    border-color: var(--sage);
+  }
+
+  .option-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  /* ── Result card ── */
+  .result-wrap {
+    display: none;
+    animation: fadeUp 0.4s ease forwards;
+  }
+  .result-wrap.visible { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--forest-dark);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px 6px 10px;
+    margin-bottom: 18px;
+  }
+  .result-badge-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .result-badge-text {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+  }
+
+  .result-title {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .result-desc {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+
+  .stat-pill {
+    background: var(--forest-dark);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .cta-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--white);
+    color: var(--forest);
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s, transform 0.12s;
+    margin-bottom: 10px;
+  }
+  .cta-btn:hover { background: var(--off-white); transform: translateY(-1px); }
+
+  .restart-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: rgba(255,255,255,0.45);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    transition: color 0.18s;
+  }
+  .restart-btn:hover { color: rgba(255,255,255,0.8); }
+
+  /* ── Question transition ── */
+  .question-wrap {
+    animation: fadeUp 0.3s ease forwards;
+  }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    padding: 14px 28px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: rgba(255,255,255,0.28);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 420px) {
+    .quiz-body { padding: 22px 18px 24px; }
+    .question-text { font-size: 17px; }
+    .result-title { font-size: 22px; }
+    .quiz-header { padding: 18px 18px 14px; }
+    .disclaimer { padding: 12px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="quiz-wrap">
+  <div class="quiz-card">
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <div class="quiz-header">
+      <div class="mood-dot"></div>
+      <span class="quiz-eyebrow">Find your format</span>
+      <span class="step-count" id="stepCount">1 of 3</span>
+    </div>
+
+    <div class="quiz-body">
+
+      <!-- Questions -->
+      <div id="questionWrap">
+        <div class="question-text" id="questionText"></div>
+        <div class="options" id="optionsWrap"></div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-wrap" id="resultWrap">
+        <div class="result-badge">
+          <div class="result-badge-dot" id="resultDot"></div>
+          <span class="result-badge-text">Your match</span>
+        </div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-desc" id="resultDesc"></div>
+        <div class="result-stats" id="resultStats"></div>
+        <a id="ctaBtn" class="cta-btn" href="#" target="_blank" rel="noopener">Shop this format →</a>
+        <button class="restart-btn" id="restartBtn">↩ Retake the quiz</button>
+      </div>
+
+    </div>
+
+    <div class="disclaimer">
+      Not medical advice. Start low, go slow. Always use responsibly and in accordance with local laws.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+
+  var questions = [
+    {
+      text: "When do you most want to use a fast-acting edible?",
+      options: [
+        { icon: "💼", label: "During the workday — discreet & quick",  value: "work"    },
+        { icon: "🌙", label: "Evening wind-down at home",               value: "evening" },
+        { icon: "🎉", label: "Social events or dinners out",            value: "social"  },
+      ]
+    },
+    {
+      text: "How do you feel about bitter or medicinal flavours?",
+      options: [
+        { icon: "👍", label: "Fine with me if it works fast",   value: "tolerant" },
+        { icon: "😬", label: "I'd rather it taste good",        value: "taste"    },
+      ]
+    },
+    {
+      text: "How comfortable are you with dosing from scratch?",
+      options: [
+        { icon: "🔰", label: "New to fast-acting — keep it gentle",  value: "new"  },
+        { icon: "🎯", label: "Experienced — I want precise control", value: "exp"  },
+        { icon: "🌊", label: "I like to sip and feel my way",        value: "flow" },
+      ]
+    }
+  ];
+
+  var results = {
+    sublingual: {
+      title: "Sublingual Strips",
+      desc:   "You need speed and discretion above everything else. Strips dissolve under your tongue in seconds, skip digestion entirely, and leave no trace — perfect for focused, on-the-clock use.",
+      onset:  "5–15 min",
+      duration: "2–3 hrs",
+      colour: "#A0C5BE",
+      url:    "https://mood.com/shop/product-category/fast-acting-gummies"
+    },
+    nano: {
+      title: "Nano Gummies",
+      desc:   "You want the reliability of a fast onset with the convenience and great taste of a gummy. Nano-emulsified THC gets you there in 15–25 minutes with no compromise on flavour.",
+      onset:  "15–25 min",
+      duration: "3–4 hrs",
+      colour: "#A8C5A0",
+      url:    "https://mood.com/product/rapid-onset-delta-9-thc-gummies"
+    },
+    seltzer: {
+      title: "THC Seltzers",
+      desc:   "Social, sippable, and seamless. A THC seltzer lets you pace yourself naturally, blends in wherever drinks are welcome, and still hits faster than a traditional edible.",
+      onset:  "15–30 min",
+      duration: "2–4 hrs",
+      colour: "#B8A8D4",
+      url:    "https://mood.com/shop/product-category/beverages"
+    },
+    micro: {
+      title: "Micro-Dose Gummies",
+      desc:   "Starting low is smart. Micro-dose gummies give you total control over your experience — take one, wait 30 minutes, and build from there. The ideal on-ramp to fast-acting formats.",
+      onset:  "15–25 min",
+      duration: "2–3 hrs",
+      colour: "#D4C5A0",
+      url:    "https://mood.com/product/micro-dose-delta-9-thc-gummies"
+    }
+  };
+
+  function score(answers) {
+    var situation = answers[0];
+    var taste     = answers[1];
+    var experience = answers[2];
+
+    if (experience === "new")                          return "micro";
+    if (situation === "social" || experience === "flow") return "seltzer";
+    if (situation === "work"   && taste === "tolerant")  return "sublingual";
+    return "nano";
+  }
+
+  var answers  = [];
+  var current  = 0;
+  var total    = questions.length;
+
+  var progressFill = document.getElementById("progressFill");
+  var stepCount    = document.getElementById("stepCount");
+  var questionWrap = document.getElementById("questionWrap");
+  var questionText = document.getElementById("questionText");
+  var optionsWrap  = document.getElementById("optionsWrap");
+  var resultWrap   = document.getElementById("resultWrap");
+  var resultDot    = document.getElementById("resultDot");
+  var resultTitle  = document.getElementById("resultTitle");
+  var resultDesc   = document.getElementById("resultDesc");
+  var resultStats  = document.getElementById("resultStats");
+  var ctaBtn       = document.getElementById("ctaBtn");
+  var restartBtn   = document.getElementById("restartBtn");
+
+  function setProgress(step) {
+    var pct = Math.round((step / total) * 100);
+    progressFill.style.width = pct + "%";
+    stepCount.textContent = step < total
+      ? (step + 1) + " of " + total
+      : "Done!";
+  }
+
+  function renderQuestion(index) {
+    var q = questions[index];
+
+    // Re-trigger animation
+    questionWrap.style.animation = "none";
+    questionWrap.offsetHeight;
+    questionWrap.style.animation = "";
+    questionWrap.classList.add("question-wrap");
+
+    questionText.textContent = q.text;
+    optionsWrap.innerHTML = "";
+
+    q.options.forEach(function (opt) {
+      var btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.innerHTML =
+        '<span class="option-icon">' + opt.icon + '</span>' +
+        '<span>' + opt.label + '</span>';
+      btn.addEventListener("click", function () {
+        // Visual flash
+        btn.classList.add("selected");
+        setTimeout(function () {
+          answers.push(opt.value);
+          current++;
+          setProgress(current);
+          if (current < total) {
+            renderQuestion(current);
+          } else {
+            showResult();
+          }
+        }, 180);
+      });
+      optionsWrap.appendChild(btn);
+    });
+  }
+
+  function showResult() {
+    var key = score(answers);
+    var r   = results[key];
+
+    questionWrap.style.display = "none";
+    resultWrap.classList.add("visible");
+
+    resultDot.style.background  = r.colour;
+    resultTitle.textContent      = r.title;
+    resultDesc.textContent       = r.desc;
+    resultStats.innerHTML =
+      '<div class="stat-pill">' +
+        '<div class="stat-label" style="color:' + r.colour + '">Typical onset</div>' +
+        '<div class="stat-value">' + r.onset + '</div>' +
+      '</div>' +
+      '<div class="stat-pill">' +
+        '<div class="stat-label" style="color:' + r.colour + '">Duration</div>' +
+        '<div class="stat-value">' + r.duration + '</div>' +
+      '</div>';
+    ctaBtn.href = r.url;
+    ctaBtn.textContent = "Shop " + r.title + " →";
+    progressFill.style.background = r.colour;
+  }
+
+  function restart() {
+    answers  = [];
+    current  = 0;
+    resultWrap.classList.remove("visible");
+    questionWrap.style.display = "";
+    progressFill.style.background = "var(--sage)";
+    setProgress(0);
+    renderQuestion(0);
+  }
+
+  restartBtn.addEventListener("click", restart);
+
+  // Init
+  setProgress(0);
+  renderQuestion(0);
+
+})();
+</script>
+
+</body>
+</html>
